@@ -12,7 +12,6 @@ $(document).ready(function () {
       var cityRow = $("<tr>");
       var cityColumn = $("<td>");
       var cityLink = $("<h2>");
-    //   cityLink.attr("city-name", cityList[i]);
       cityLink.text(cityList[i]);
       $(cityColumn).append(cityLink);
       $(cityRow).append(cityColumn);
@@ -32,67 +31,64 @@ $(document).ready(function () {
           method: "GET"
       })
 
-          .then(function (response) {
+        .then(function (response) {
+            lowTempFaren = Math.floor(((response.main.temp_min - 273.15) * 1.8) + 32);
+            highTempFaren = Math.floor(((response.main.temp_min - 273.15) * 1.8) + 32);
 
-              console.log(response);
+            $("#lowDiv").text("Low of: " + lowTempFaren + "°F");
+            $("#highDiv").text("High of: " + highTempFaren + "°F");
+            $("#humidity").text("Humidity: " + response.main.humidity + "%");
+            $("#windSpeed").text("Wind Speed: " + response.wind.speed + " MPH");
+            $("#description").text("Today's Weather: " + response.weather[0].description);
+            weather_icon = response.weather[0].icon + ".png"
+            $("#cityHeader").text(response.name);
 
-              lowTempFaren = Math.floor(((response.main.temp_min - 273.15) * 1.8) + 32);
-              highTempFaren = Math.floor(((response.main.temp_min - 273.15) * 1.8) + 32);
+            var cityRow = $("<tr>");
+            var cityColumn = $("<td>");
+            var cityLink = $("<h2>");
+            cityLink.text(response.name);
+            cityLink.attr("id", "newBtn");
+            cityLink.attr("city-name", response.name);
+            $(cityColumn).append(cityLink);
+            $(cityRow).append(cityColumn);
+            $("tbody").prepend(cityRow);
 
-              $("#lowDiv").text("Low of: " + lowTempFaren + "°F");
-              $("#highDiv").text("High of: " + highTempFaren + "°F");
-              $("#humidity").text("Humidity: " + response.main.humidity + "%");
-              $("#windSpeed").text("Wind Speed: " + response.wind.speed + " MPH");
-              $("#description").text("Today's Weather: " + response.weather[0].description);
-              weather_icon = response.weather[0].icon + ".png"
-              $("#cityHeader").text(response.name);
+            cityList = JSON.parse(localStorage.getItem("city"));
+            if (cityList === null) {
+                cityList = [];
+            }
+            cityList.push(response.name);
+            localStorage.setItem("city", JSON.stringify(cityList));
 
-              var cityRow = $("<tr>");
-              var cityColumn = $("<td>");
-              var cityLink = $("<h2>");
-              cityLink.text(response.name);
-              cityLink.attr("id", "newBtn");
-              cityLink.attr("city-name", response.name);
-              $(cityColumn).append(cityLink);
-              $(cityRow).append(cityColumn);
-              $("tbody").prepend(cityRow);
-
-              cityList = JSON.parse(localStorage.getItem("city"));
-              if (cityList === null) {
-                  cityList = [];
-              }
-              cityList.push(response.name);
-              localStorage.setItem("city", JSON.stringify(cityList));
-
-          });
+        });
 
 
       var queryURLForecast = "https://api.openweathermap.org/data/2.5/forecast?q=" +
           city + "&appid=1f2cf6d8fabf4123eb61df651c4f522d";
 
-      $.ajax({
-          url: queryURLForecast,
-          method: "GET"
-      }).then(function (response) {
-              console.log(response);
-              localStorage.setItem("forecast", JSON.stringify(response));
-              result = JSON.parse(localStorage.getItem("forecast"));
-              newDays = [1, 2, 3, 4, 5]
-              for (var i = 0; i < newDays.length; i++) {
-                  var dayTemp = result.list[i].main.temp;
-                  var dayTempFaren = Math.floor(((dayTemp - 273.15) * 1.8) + 32);
-                  var dayDate = result.list[i].dt;
-                  var dayHumidity = result.list[i].main.humidity;
-                  var dayWindSpeed = result.list[i].wind.speed;
+    $.ajax({
+        url: queryURLForecast,
+        method: "GET"
+    }).then(function (response) {
+            console.log(response);
+            localStorage.setItem("forecast", JSON.stringify(response));
+            result = JSON.parse(localStorage.getItem("forecast"));
+            newDays = [1, 2, 3, 4, 5]
+            for (var i = 0; i < newDays.length; i++) {
+                var dayTemp = result.list[i].main.temp;
+                var dayTempFaren = Math.floor(((dayTemp - 273.15) * 1.8) + 32);
+                var dayDate = result.list[i].dt;
+                var dayHumidity = result.list[i].main.humidity;
+                var dayWindSpeed = result.list[i].wind.speed;
 
-                  $("#day" + newDays[i] + "_date").text(moment.unix(dayDate).format("MMMM Do"));
-                  $("#day" + newDays[i] + "_date").attr("class", "date");
-                  $("#day" + newDays[i] + "_temp").text(dayTempFaren + "°F");
-                  $("#day" + newDays[i] + "_humidity").text(dayHumidity + "% Humidity");
-                  $("#day" + newDays[i] + "_wind").attr("class", "windText");
-                  $("#day" + newDays[i] + "_wind").text("Wind: " + dayWindSpeed + " MPH");
-              };
-              $("#weatherInfo").attr("style", "display: block");
-          });
-  });
+                $("#day" + newDays[i] + "_date").text(moment.unix(dayDate).format("MMMM Do"));
+                $("#day" + newDays[i] + "_date").attr("class", "date");
+                $("#day" + newDays[i] + "_temp").text(dayTempFaren + "°F");
+                $("#day" + newDays[i] + "_humidity").text(dayHumidity + "% Humidity");
+                $("#day" + newDays[i] + "_wind").attr("class", "windText");
+                $("#day" + newDays[i] + "_wind").text("Wind: " + dayWindSpeed + " MPH");
+            };
+            $("#weatherInfo").attr("style", "display: block");
+        });
+});
 });
