@@ -49,9 +49,8 @@ $(document).ready(function () {
 
               var cityRow = $("<tr>");
               var cityColumn = $("<td>");
-              var cityLink = $("<button>");
+              var cityLink = $("<h2>");
               cityLink.text(response.name);
-              cityLink.attr("class", "btn btn-light");
               cityLink.attr("id", "newBtn");
               cityLink.attr("city-name", response.name);
               $(cityColumn).append(cityLink);
